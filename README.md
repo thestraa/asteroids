@@ -1,1 +1,1 @@
-# asteroids
+# Creating Asteroids game on python as a second project
