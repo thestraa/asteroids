@@ -7,7 +7,7 @@ class GameScore:
         # Add this with your other initializations
         self.score = 0
         self.high_score = self.load_high_score() # Load high score when game starts
-
+        self.font = pygame.font.SysFont("simsun", 36)
 
     def save_high_score(self):
         try:
@@ -34,9 +34,9 @@ class GameScore:
 
     def draw(self, screen):
         # Add this to draw the score
-        font = pygame.font.SysFont("simsun", 36)
-        score_text = font.render(f"Score: {self.score}", True, "white")
-        high_score_text = font.render(f"High Score: {self.high_score}", True, "yellow")
+
+        score_text = self.font.render(f"Score: {self.score}", True, "white")
+        high_score_text = self.font.render(f"High Score: {self.high_score}", True, "yellow")
         screen.blit(score_text, (10, 10))  # Position in top-left corner
         screen.blit(high_score_text, (10, 40))
 

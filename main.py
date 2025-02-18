@@ -26,7 +26,7 @@ def initialize_game():
     # Create new player and asteroids
     player = Player(x=SCREEN_WIDTH / 2, y=SCREEN_HEIGHT / 2)
     asteroid_field = AsteroidField()
-    score_display = GameScore()
+    score_display = GameScore() # Calling score and highscore to display
     score_display.reset_score()
 
 def main():
@@ -57,7 +57,7 @@ def main():
             for bullet in shots:
                 if asteroid.collision(bullet):
                     bullet.kill()
-                    score_display.add_points(asteroid.radius)
+                    score_display.add_points(asteroid.radius) # Increasing score when asteroid gets destroyed
                     asteroid.split()
 
                 
