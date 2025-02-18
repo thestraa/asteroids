@@ -9,7 +9,7 @@ from shot import Shot
 
 def initialize_game():
     """Resets all game objects and variables."""
-    global updatable, drawable, asteroids, player, asteroid_field
+    global updatable, drawable, asteroids, player, asteroid_field, shots
 
     # Reset sprite groups
     updatable = pygame.sprite.Group()
@@ -47,6 +47,12 @@ def main():
             if player.collision(asteroid):
                 game_over_loop(screen)  # Call Game Over loop
                 initialize_game()       # Reinitialize the game objects
+        for asteroid in asteroids:
+            for bullet in shots:
+                if asteroid.collision(bullet):
+                    bullet.kill()
+                    asteroid.split()
+
                 
 
         screen.fill(SCREEN_COLOR)
