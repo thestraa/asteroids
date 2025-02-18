@@ -4,7 +4,7 @@ from constants import *
 
 
 def draw_buttons(screen):
-    font = pygame.font.Font(None, 50)
+    font = pygame.font.Font("simsun", 50)
 
     # Define button properties
     restart_button = pygame.Rect(SCREEN_WIDTH//2 - 100, SCREEN_HEIGHT//2 - 50, 200, 50)
