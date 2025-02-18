@@ -3,6 +3,8 @@ import random
 import math
 from circleshape import CircleShape
 from constants import ASTEROID_MIN_RADIUS
+from particleseffect import Particle
+from gamestate import particles
 
 class Asteroid(CircleShape):
     def __init__(self, x, y, radius):
@@ -26,7 +28,31 @@ class Asteroid(CircleShape):
     def update(self, dt):
         self.position += (self.velocity * dt)
 
+
+    def create_explosion(self):
+        particles = []
+        # Create particles in a circular pattern
+        num_particles = 20
+        for i in range(num_particles):
+            angle = random.uniform(0, 2 * math.pi)
+            speed = random.uniform(100, 200)
+            velocity = pygame.math.Vector2(math.cos(angle), math.sin(angle)) * speed
+            
+            # Color based on asteroid size
+            if self.radius > ASTEROID_MIN_RADIUS * 2:
+                color = (255, 100, 0)  # Orange for large asteroids
+            elif self.radius > ASTEROID_MIN_RADIUS:
+                color = (200, 200, 0)  # Yellow for medium asteroids
+            else:
+                color = (255, 255, 255)  # White for small asteroids
+                
+            particles.append(Particle(self.position, velocity, color))
+        return particles
+    
     def split(self):
+        global particles
+        particles.extend(self.create_explosion())
+
         self.kill()
         if self.radius <= ASTEROID_MIN_RADIUS:
             return

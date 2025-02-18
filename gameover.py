@@ -1,79 +1,70 @@
 import pygame
 import sys
+import math
 from constants import *
 
+# Helper function to draw buttons
+def draw_button(screen, button_rect, text, font, color, text_color):
+    pygame.draw.rect(screen, color, button_rect)
+    button_text = font.render(text, True, text_color)
+    screen.blit(button_text, (
+        button_rect.x + button_rect.width // 2 - button_text.get_width() // 2,
+        button_rect.y + button_rect.height // 2 - button_text.get_height() // 2,
+    ))
 
-def draw_buttons(screen):
-    font = pygame.font.Font("simsun", 50)
+def draw_high_score(screen, score_font, pulse):
+    yellow_pulse = int(255 * pulse)
+    high_score_text = score_font.render("NEW HIGH SCORE!", True, (255, yellow_pulse, 0))
+    
+    scale = 1.0 + (pulse * 0.2)
+    scaled_width = int(high_score_text.get_width() * scale)
+    scaled_height = int(high_score_text.get_height() * scale)
+    
+    scaled_text = pygame.transform.scale(high_score_text, (scaled_width, scaled_height))
+    text_x = SCREEN_WIDTH // 2 - scaled_width // 2
+    text_y = SCREEN_HEIGHT // 2 - 120
+    screen.blit(scaled_text, (text_x, text_y))
 
-    # Define button properties
-    restart_button = pygame.Rect(SCREEN_WIDTH//2 - 100, SCREEN_HEIGHT//2 - 50, 200, 50)
-    quit_button = pygame.Rect(SCREEN_WIDTH//2 - 100, SCREEN_HEIGHT//2 + 20, 200, 50)
-
-    # Draw buttons
-    pygame.draw.rect(screen, (0, 255, 0), restart_button)  # Green Restart button
-    pygame.draw.rect(screen, (255, 0, 0), quit_button)    # Red Quit button
-
-    # Draw text
-    restart_text = font.render("Restart", True, (0, 0, 0))
-    quit_text = font.render("Quit", True, (0, 0, 0))
-    screen.blit(restart_text, (restart_button.x + 50, restart_button.y + 5))
-    screen.blit(quit_text, (quit_button.x + 65, quit_button.y + 5))
-
-    pygame.display.flip()
-
-    return restart_button, quit_button
-
-
-def game_over_loop(screen):
-    font = pygame.font.Font(None, 74)  # Font for "Game Over" text
-    button_font = pygame.font.Font(None, 50)  # Font for button text
-
-    # Define the button properties
+def game_over_loop(screen, score_display):
+    # Initialize fonts
+    font = pygame.font.SysFont("simsun", 74)
+    button_font = pygame.font.SysFont("simsun", 50)
+    score_font = pygame.font.SysFont("simsun", 36)
+    
     restart_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2, 200, 50)
     quit_button = pygame.Rect(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 70, 200, 50)
-
-    # Draw the "Game Over" screen
-    screen.fill((0, 0, 0))  # Fill the screen with black
-    text = font.render("Game Over", True, (255, 0, 0))  # Render "Game Over" in red
-    screen.blit(
-        text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 100)
-    )  # Center the text
-
-    # Draw buttons
-    pygame.draw.rect(screen, (0, 255, 0), restart_button)  # Green Restart button
-    restart_text = button_font.render("Restart", True, (0, 0, 0))  # Black text
-    screen.blit(
-        restart_text,
-        (
-            restart_button.x + restart_button.width // 2 - restart_text.get_width() // 2,
-            restart_button.y + restart_button.height // 2 - restart_text.get_height() // 2,
-        ),
-    )
-
-    pygame.draw.rect(screen, (255, 0, 0), quit_button)  # Red Quit button
-    quit_text = button_font.render("Quit", True, (0, 0, 0))  # Black text
-    screen.blit(
-        quit_text,
-        (
-            quit_button.x + quit_button.width // 2 - quit_text.get_width() // 2,
-            quit_button.y + quit_button.height // 2 - quit_text.get_height() // 2,
-        ),
-    )
-
-    pygame.display.flip()  # Update the display
-
-    # Game Over loop to handle events
+    
     while True:
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:  # Quit the program if the window is closed
+            if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:  # Check for mouse clicks
-                mouse_pos = event.pos  # Get the mouse position when clicked
-
-                if restart_button.collidepoint(mouse_pos):  # Check if "Restart" was clicked
-                    return  # Exit this loop to restart the game
-                elif quit_button.collidepoint(mouse_pos):  # Check if "Quit" was clicked
+            elif event.type == pygame.MOUSEBUTTONUP:
+                mouse_pos = event.pos
+                if restart_button.collidepoint(mouse_pos):
+                    return
+                elif quit_button.collidepoint(mouse_pos):
+                    score_display.update_high_score()
                     pygame.quit()
-                    sys.exit()  # Exit the game completely
+                    sys.exit()
+
+        # Animation logic
+        current_time = pygame.time.get_ticks()
+        pulse = (math.sin(current_time * 0.005) + 1) * 0.5
+
+        screen.fill(SCREEN_COLOR)
+
+        text = font.render("Game Over", True, (255, 0, 0))
+        screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, SCREEN_HEIGHT // 2 - 250))
+
+        score_text = score_font.render(f"Final Score: {score_display.score}", True, (255, 255, 255))
+        screen.blit(score_text, (SCREEN_WIDTH // 2 - score_text.get_width() // 2, SCREEN_HEIGHT // 2 - 70))
+
+        if score_display.check_high_score():
+            draw_high_score(screen, score_font, pulse)
+
+        # Draw buttons using helper function
+        draw_button(screen, restart_button, "Restart", button_font, (0, 255, 0), (0, 0, 0))
+        draw_button(screen, quit_button, "Quit", button_font, (255, 0, 0), (0, 0, 0))
+
+        pygame.display.flip()
